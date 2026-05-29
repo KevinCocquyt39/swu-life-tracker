@@ -480,7 +480,7 @@ body {
 }
 
 .hp-num {
-  font-size: clamp(4.5rem, 18vw, 9rem);
+  font-size: clamp(6rem, 24vw, 12rem);
   font-weight: 900;
   line-height: 1;
   color: var(--yellow);
