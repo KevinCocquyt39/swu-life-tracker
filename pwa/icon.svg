@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#020408" rx="96"/>
+
+  <!-- Stars -->
+  <circle cx="80"  cy="60"  r="2.5" fill="white" opacity="0.7"/>
+  <circle cx="180" cy="40"  r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="340" cy="80"  r="2"   fill="white" opacity="0.6"/>
+  <circle cx="440" cy="50"  r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="60"  cy="200" r="1.5" fill="white" opacity="0.4"/>
+  <circle cx="460" cy="180" r="2"   fill="white" opacity="0.6"/>
+  <circle cx="70"  cy="420" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="450" cy="400" r="2"   fill="white" opacity="0.6"/>
+  <circle cx="130" cy="460" r="1.5" fill="white" opacity="0.4"/>
+  <circle cx="390" cy="450" r="2"   fill="white" opacity="0.5"/>
+
+  <!-- Red saber — soft glow layer -->
+  <line x1="108" y1="108" x2="404" y2="404" stroke="#CC0020" stroke-width="56" stroke-linecap="round" opacity="0.35"/>
+  <!-- Red saber — core -->
+  <line x1="108" y1="108" x2="404" y2="404" stroke="#FF1744" stroke-width="22" stroke-linecap="round"/>
+  <!-- Red saber — inner highlight -->
+  <line x1="108" y1="108" x2="404" y2="404" stroke="rgba(255,210,210,0.75)" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Blue saber — soft glow layer -->
+  <line x1="404" y1="108" x2="108" y2="404" stroke="#005599" stroke-width="56" stroke-linecap="round" opacity="0.35"/>
+  <!-- Blue saber — core -->
+  <line x1="404" y1="108" x2="108" y2="404" stroke="#40C4FF" stroke-width="22" stroke-linecap="round"/>
+  <!-- Blue saber — inner highlight -->
+  <line x1="404" y1="108" x2="108" y2="404" stroke="rgba(210,240,255,0.75)" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Intersection white flash -->
+  <circle cx="256" cy="256" r="40" fill="white" opacity="0.25"/>
+  <circle cx="256" cy="256" r="22" fill="white" opacity="0.8"/>
+  <circle cx="256" cy="256" r="10" fill="white"/>
+</svg>

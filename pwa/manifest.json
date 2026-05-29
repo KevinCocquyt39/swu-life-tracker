@@ -1,0 +1,27 @@
+{
+  "name": "SWU Life Tracker",
+  "short_name": "SWU Tracker",
+  "description": "Star Wars: Unlimited damage counter for 2 players",
+  "start_url": "./swu-life-tracker.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#020408",
+  "theme_color": "#FFE81F",
+  "lang": "en",
+  "categories": ["games", "utilities"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

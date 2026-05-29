@@ -6,6 +6,9 @@
 .cache
 dist
 
+# PWA standalone build – tracked in git
+!pwa
+
 # Node dependencies
 node_modules
 
