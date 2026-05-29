@@ -18,6 +18,11 @@
     <!-- ══════════════ PLAYER 1 – DARK SIDE (rotated 180°) ══════════════ -->
     <section class="player-panel dark-side" :class="stateClass(p1hp, startHp1)">
       <div class="panel-inner">
+        <div class="faction-name ls-label">
+          <span class="pip" />
+          DARK SIDE
+          <span class="pip" />
+        </div>
         <div class="counter-row">
           <button class="btn-counter" @click="change(1, -1)" @contextmenu.prevent="change(1, -5)"
             aria-label="Decrease Dark Side HP">
