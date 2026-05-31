@@ -1,5 +1,5 @@
 <template>
-  <div class="arena">
+  <div class="arena" :class="theme">
     <!-- CSS Starfield -->
     <div class="starfield" aria-hidden="true">
       <div v-for="i in 130" :key="i" class="star" :style="{
@@ -46,6 +46,10 @@
       <button class="settings-btn" @click="openConfig" aria-label="Configure game" title="Configure">
         ⚙
       </button>
+      <button class="timer-btn" @click="toggleTimer" :aria-label="timerRunning ? 'Pause timer' : 'Start timer'" :title="timerRunning ? 'Pause' : 'Start'">
+        <span>{{ timerRunning ? '⏸' : '▶' }}</span>
+      </button>
+      <span class="timer-display" aria-live="off" aria-label="Game timer">{{ timerFormatted }}</span>
       <button class="reset-orb" @click="reset" aria-label="Reset game" title="Reset game">
         <span class="reset-icon">↺</span>
       </button>
@@ -107,6 +111,20 @@
             </div>
           </div>
 
+          <!-- Theme selector -->
+          <div class="theme-section">
+            <div class="theme-label">ENVIRONMENT</div>
+            <div class="theme-options">
+              <button v-for="t in THEMES" :key="t.id"
+                class="theme-btn"
+                :class="['theme-btn--' + t.id, { active: draftTheme === t.id }]"
+                @click="draftTheme = t.id">
+                <span class="theme-icon">{{ t.icon }}</span>
+                <span class="theme-name">{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
+
           <div class="config-actions">
             <button class="config-btn cancel-btn" @click="closeConfig">CANCEL</button>
             <button class="config-btn apply-btn" @click="applyConfig">ENGAGE</button>
@@ -135,6 +153,15 @@
 
 <script setup lang="ts">
 const PRESETS = [20, 25, 30, 35]
+const THEMES = [
+  { id: 'space',    icon: '✦', label: 'SPACE' },
+  { id: 'tatooine', icon: '☀', label: 'TATOOINE' },
+  { id: 'hoth',     icon: '❄', label: 'HOTH' },
+  { id: 'endor',    icon: '🌿', label: 'ENDOR' },
+]
+
+const theme = ref('space')
+const draftTheme = ref('space')
 
 const startHp1 = ref(30)
 const startHp2 = ref(30)
@@ -145,6 +172,29 @@ const p1Flash = ref(false)
 const p2Flash = ref(false)
 const victor = ref<string | null>(null)
 
+// ── Timer ─────────────────────────────────────────────────────
+const timerSeconds = ref(0)
+const timerRunning = ref(false)
+let timerIntervalId: ReturnType<typeof setInterval> | null = null
+
+const timerFormatted = computed(() => {
+  const h = Math.floor(timerSeconds.value / 3600)
+  const m = Math.floor((timerSeconds.value % 3600) / 60)
+  const s = timerSeconds.value % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+})
+
+function toggleTimer() {
+  if (timerRunning.value) {
+    clearInterval(timerIntervalId!)
+    timerIntervalId = null
+    timerRunning.value = false
+  } else {
+    timerIntervalId = setInterval(() => { timerSeconds.value++ }, 1000)
+    timerRunning.value = true
+  }
+}
+
 // ── Config modal ──────────────────────────────────────────────
 const showConfig = ref(false)
 const draftHp1 = ref(startHp1.value)
@@ -153,6 +203,7 @@ const draftHp2 = ref(startHp2.value)
 function openConfig() {
   draftHp1.value = startHp1.value
   draftHp2.value = startHp2.value
+  draftTheme.value = theme.value
   showConfig.value = true
 }
 
@@ -163,6 +214,7 @@ function closeConfig() {
 function applyConfig() {
   startHp1.value = Math.max(1, Math.min(99, draftHp1.value || 30))
   startHp2.value = Math.max(1, Math.min(99, draftHp2.value || 30))
+  theme.value = draftTheme.value
   showConfig.value = false
   reset()
 }
@@ -171,6 +223,10 @@ onMounted(() => {
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeConfig()
   })
+})
+
+onUnmounted(() => {
+  if (timerIntervalId) clearInterval(timerIntervalId)
 })
 
 // ── Game logic ────────────────────────────────────────────────
@@ -201,6 +257,7 @@ function reset() {
   p1hp.value = 0
   p2hp.value = 0
   victor.value = null
+  timerSeconds.value = 0
 }
 
 function stateClass(hp: number, max: number) {
@@ -541,8 +598,7 @@ body {
   height: var(--divider-h);
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.75);
+  justify-content: center;  gap: 10px;  background: rgba(0, 0, 0, 0.75);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
@@ -931,6 +987,219 @@ body {
   border-color: var(--yellow);
   box-shadow: 0 0 22px rgba(255, 232, 31, 0.25);
   color: #fff;
+}
+
+/* ── Timer display ───────────────────────────────────────────── */
+.timer-display {
+  font-family: var(--font-hud);
+  font-size: clamp(0.78rem, 2.4vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--yellow);
+  text-shadow: 0 0 14px rgba(255, 232, 31, 0.55), 0 0 30px rgba(255, 232, 31, 0.2);
+  min-width: 96px;
+  text-align: center;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* ── Timer button ───────────────────────────────────────────── */
+.timer-btn {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(255, 232, 31, 0.2);
+  color: rgba(255, 232, 31, 0.55);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.timer-btn:hover,
+.timer-btn:active {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  box-shadow: 0 0 16px rgba(255, 232, 31, 0.3);
+  transform: scale(1.1);
+}
+
+/* ── Themes ────────────────────────────────────────────────────── */
+/* Tatooine – desert sands */
+.arena.tatooine {
+  --bg: #1C0D02;
+  --yellow: #F5A623;
+  --yellow-dim: rgba(245, 166, 35, 0.45);
+  background: #1C0D02;
+}
+.arena.tatooine .player-panel.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(180, 60, 0, 0.22) 0%, transparent 65%), #1C0D02;
+}
+.arena.tatooine .player-panel.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(200, 140, 20, 0.2) 0%, transparent 65%), #1C0D02;
+}
+.arena.tatooine .player-panel.critical.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(210, 80, 0, 0.38) 0%, transparent 65%), #1C0D02;
+}
+.arena.tatooine .player-panel.critical.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(200, 140, 20, 0.38) 0%, transparent 65%), #1C0D02;
+}
+.arena.tatooine .divider-bar { background: rgba(28, 13, 2, 0.85); }
+.arena.tatooine .star {
+  background: #D4882A;
+  box-shadow: 0 0 3px rgba(212, 136, 42, 0.6);
+  border-radius: 30%;
+}
+.arena.tatooine .saber-blue {
+  background: linear-gradient(to right, #E8B030, transparent);
+  box-shadow: 0 0 10px #E8B030, 0 0 22px rgba(232, 176, 48, 0.55);
+}
+
+/* Hoth – ice fields */
+.arena.hoth {
+  --bg: #050A10;
+  --yellow: #9FD8F0;
+  --yellow-dim: rgba(159, 216, 240, 0.45);
+  background: #050A10;
+}
+.arena.hoth .player-panel.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(20, 50, 100, 0.28) 0%, transparent 65%), #050A10;
+}
+.arena.hoth .player-panel.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(120, 190, 230, 0.16) 0%, transparent 65%), #050A10;
+}
+.arena.hoth .player-panel.critical.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(30, 80, 160, 0.4) 0%, transparent 65%), #050A10;
+}
+.arena.hoth .player-panel.critical.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(140, 210, 245, 0.35) 0%, transparent 65%), #050A10;
+}
+.arena.hoth .divider-bar { background: rgba(5, 10, 16, 0.88); }
+.arena.hoth .star {
+  background: #D0E8FF;
+  box-shadow: 0 0 5px rgba(200, 230, 255, 0.6);
+  border-radius: 10%;
+}
+.arena.hoth .saber-red {
+  background: linear-gradient(to left, #88C4E8, transparent);
+  box-shadow: 0 0 10px #88C4E8, 0 0 22px rgba(136, 196, 232, 0.55);
+}
+.arena.hoth .saber-blue {
+  background: linear-gradient(to right, #A8DCF8, transparent);
+  box-shadow: 0 0 10px #A8DCF8, 0 0 22px rgba(168, 220, 248, 0.55);
+}
+
+/* Endor – forest moon */
+.arena.endor {
+  --bg: #020C04;
+  --yellow: #7FD93A;
+  --yellow-dim: rgba(127, 217, 58, 0.45);
+  background: #020C04;
+}
+.arena.endor .player-panel.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(0, 80, 20, 0.28) 0%, transparent 65%), #020C04;
+}
+.arena.endor .player-panel.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(40, 160, 60, 0.18) 0%, transparent 65%), #020C04;
+}
+.arena.endor .player-panel.critical.dark-side {
+  background: radial-gradient(ellipse at 50% 85%, rgba(0, 110, 30, 0.42) 0%, transparent 65%), #020C04;
+}
+.arena.endor .player-panel.critical.light-side {
+  background: radial-gradient(ellipse at 50% 15%, rgba(40, 180, 70, 0.35) 0%, transparent 65%), #020C04;
+}
+.arena.endor .divider-bar { background: rgba(2, 12, 4, 0.88); }
+.arena.endor .star {
+  background: #A0E040;
+  box-shadow: 0 0 8px rgba(160, 224, 64, 0.65);
+}
+.arena.endor .saber-red {
+  background: linear-gradient(to left, #A0E040, transparent);
+  box-shadow: 0 0 10px #A0E040, 0 0 22px rgba(160, 224, 64, 0.55);
+}
+.arena.endor .saber-blue {
+  background: linear-gradient(to right, #70CB30, transparent);
+  box-shadow: 0 0 10px #70CB30, 0 0 22px rgba(112, 203, 48, 0.55);
+}
+
+/* ── Theme selector ────────────────────────────────────────────── */
+.theme-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.theme-section .theme-label {
+  font-family: var(--font-lore);
+  font-size: clamp(0.55rem, 1.6vw, 0.78rem);
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.5);
+}
+.theme-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.theme-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 72px;
+  height: 62px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-hud);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  padding: 8px 4px 6px;
+}
+.theme-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.theme-name {
+  font-size: 0.48rem;
+  letter-spacing: 0.2em;
+}
+.theme-btn--space.active,
+.theme-btn--space:hover {
+  border-color: rgba(255, 232, 31, 0.55);
+  color: #FFE81F;
+  box-shadow: 0 0 12px rgba(255, 232, 31, 0.2);
+  background: rgba(255, 232, 31, 0.06);
+}
+.theme-btn--tatooine.active,
+.theme-btn--tatooine:hover {
+  border-color: rgba(245, 166, 35, 0.55);
+  color: #F5A623;
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.2);
+  background: rgba(245, 166, 35, 0.06);
+}
+.theme-btn--hoth.active,
+.theme-btn--hoth:hover {
+  border-color: rgba(159, 216, 240, 0.55);
+  color: #9FD8F0;
+  box-shadow: 0 0 12px rgba(159, 216, 240, 0.2);
+  background: rgba(159, 216, 240, 0.06);
+}
+.theme-btn--endor.active,
+.theme-btn--endor:hover {
+  border-color: rgba(127, 217, 58, 0.55);
+  color: #7FD93A;
+  box-shadow: 0 0 12px rgba(127, 217, 58, 0.2);
+  background: rgba(127, 217, 58, 0.06);
 }
 
 /* ── Transitions ─────────────────────────────────────────────── */
