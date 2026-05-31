@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SWU Life Tracker</string>
+    <string name="title_activity_main">SWU Life Tracker</string>
+    <string name="package_name">com.swulifetracker.app</string>
+    <string name="custom_url_scheme">com.swulifetracker.app</string>
+</resources>
